@@ -36,7 +36,7 @@
 
     let pipes = [];
     let score = 0;
-    let gameRunning = true;
+    let gameRunning = false;
 
     const pipeWidth = 50;
     const pipeGap = 150;
@@ -142,13 +142,17 @@
     }
 
     function flap() {
+        if (!gameRunning) {
+            gameRunning = true;
+            gameLoop();
+        }
         bird.velocity = bird.jump;
     }
 
     canvas.addEventListener("touchstart", flap);
 
     createPipe();
-    gameLoop();
+    drawBird();
 </script>
 </body>
 </html>
