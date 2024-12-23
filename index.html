@@ -36,17 +36,30 @@
 <body>
 
   <!-- JavaScript to check if it's a mobile device -->
-  <!-- <script>
-    if (!/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      document.body.innerHTML = "<h1>This page is only accessible from a mobile device.</h1>";
+  <script>
+    function animateDiv() {
+      const myDiv = document.getElementById("cont1");
+
+      // Add entrance animation (e.g., fadeIn)
+      myDiv.classList.add("animate__fadeInRight");
+
+      // Wait for 3 seconds, then add exit animation (e.g., fadeOut)
+      setTimeout(function() {
+        myDiv.classList.remove("animate__fadeInRight"); // Remove the entrance animation
+        myDiv.classList.add("animate__fadeOutLeft");   // Add the exit animation
+      }, 3000); // Wait 3 seconds
     }
-  </script>-->
+
+    window.onload = animateDiv;
+  </script>
+  
 
   <!-- Content to show on mobile -->
   <div class="container">
-    <div>
-      <h1 class="animate__animated animate__bounceIn">The greatest IT Consultant once sat on this desk ...</h1>
-      <img src="YOUR_GIF_URL_HERE" alt="GIF">
+    <div id="cont1" class="animate__animated animate__bounceIn">
+      <h1>The greatest IT Consultant</h1>
+	  <h1>once sat on this desk ...</h1>
+
     </div>
   </div>
 
