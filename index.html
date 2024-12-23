@@ -37,11 +37,14 @@
     let pipes = [];
     let score = 0;
     let gameRunning = false;
-    let lastTime = 0;
 
     const pipeWidth = 50;
     const pipeGap = 150;
-    const pipeSpeed = 200; // Speed in pixels per second
+    const pipeSpeed = 3; // Pixels per frame
+
+    const fps = 60; // Fixed update rate
+    const frameDuration = 1000 / fps;
+    let lastUpdateTime = 0;
 
     function createPipe() {
         const topHeight = Math.random() * (canvas.height / 2);
@@ -53,7 +56,7 @@
     }
 
     function drawBird() {
-        ctx.fillStyle = "yellow";
+        ctx.fillStyle = "red";
         ctx.beginPath();
         ctx.arc(bird.x, bird.y, bird.size, 0, Math.PI * 2);
         ctx.fill();
@@ -67,10 +70,9 @@
         });
     }
 
-    function updatePipes(deltaTime) {
-        const pipeMovement = (pipeSpeed * deltaTime) / 1000;
+    function updatePipes() {
         pipes.forEach(pipe => {
-            pipe.x -= pipeMovement;
+            pipe.x -= pipeSpeed;
         });
 
         // Remove pipes that are off-screen
@@ -109,48 +111,51 @@
         });
     }
 
-    function gameLoop(timestamp) {
-        if (!gameRunning) return;
-
-        const deltaTime = timestamp - lastTime;
-        lastTime = timestamp;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Update bird
+    function gameUpdate() {
         bird.velocity += gravity;
         bird.y += bird.velocity;
 
-        // Update pipes
-        updatePipes(deltaTime);
+        updatePipes();
 
-        // Check collisions
         if (checkCollision()) {
             gameRunning = false;
             alert(`Game Over! Your score: ${score}`);
             window.location.reload();
         }
 
-        // Update score
         updateScore();
+    }
 
-        // Draw everything
+    function gameRender() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         drawBird();
         drawPipes();
 
-        // Draw score
         ctx.fillStyle = "white";
         ctx.font = "30px Arial";
         ctx.fillText(`Score: ${score}`, 10, 40);
+    }
 
+    function gameLoop(timestamp) {
+        if (!gameRunning) return;
+
+        if (!lastUpdateTime) lastUpdateTime = timestamp;
+        const deltaTime = timestamp - lastUpdateTime;
+
+        if (deltaTime >= frameDuration) {
+            lastUpdateTime = timestamp;
+            gameUpdate();
+        }
+
+        gameRender();
         requestAnimationFrame(gameLoop);
     }
 
     function flap() {
         if (!gameRunning) {
             gameRunning = true;
-            lastTime = performance.now();
-            gameLoop(lastTime);
+            requestAnimationFrame(gameLoop);
         }
         bird.velocity = bird.jump;
     }
