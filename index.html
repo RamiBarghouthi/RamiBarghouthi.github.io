@@ -37,6 +37,7 @@
     let pipes = [];
     let score = 0;
     let gameRunning = false;
+    const inputQueue = [];
 
     const pipeWidth = 50;
     const pipeGap = 150;
@@ -56,7 +57,7 @@
     }
 
     function drawBird() {
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "yellow";
         ctx.beginPath();
         ctx.arc(bird.x, bird.y, bird.size, 0, Math.PI * 2);
         ctx.fill();
@@ -115,6 +116,12 @@
         bird.velocity += gravity;
         bird.y += bird.velocity;
 
+        // Process input queue
+        while (inputQueue.length > 0) {
+            inputQueue.shift();
+            bird.velocity = bird.jump;
+        }
+
         updatePipes();
 
         if (checkCollision()) {
@@ -153,14 +160,14 @@
     }
 
     function flap() {
+        inputQueue.push(true);
         if (!gameRunning) {
             gameRunning = true;
             requestAnimationFrame(gameLoop);
         }
-        bird.velocity = bird.jump;
     }
 
-    canvas.addEventListener("touchstart", flap);
+    canvas.addEventListener("touchstart", flap, { passive: false });
 
     createPipe();
     drawBird();
