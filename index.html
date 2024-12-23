@@ -31,36 +31,67 @@
       font-size: 2em;
       color: #333;
     }
+	
+	#div1 {
+	 display: none;
+	}
+	#div2 {
+	 display: none;
+	}
   </style>
 </head>
 <body>
 
   <!-- JavaScript to check if it's a mobile device -->
   <script>
-    function animateDiv() {
-      const myDiv = document.getElementById("cont1");
+    function fadeInAndOut() {
+      const div1 = document.getElementById("div1");
+      const div2 = document.getElementById("div2");
 
-      // Add entrance animation (e.g., fadeIn)
-      myDiv.classList.add("animate__fadeInRight");
+      // Fade in div1
+      div1.style.display = "block";  // Make div1 visible
+      div1.classList.add("animate__fadeInRight");
 
-      // Wait for 3 seconds, then add exit animation (e.g., fadeOut)
+      // After 3 seconds, fade out div1 and fade in div2
       setTimeout(function() {
-        myDiv.classList.remove("animate__fadeInRight"); // Remove the entrance animation
-        myDiv.classList.add("animate__fadeOutLeft");   // Add the exit animation
-      }, 3000); // Wait 3 seconds
+        div1.classList.remove("animate__fadeInRight");
+        div1.classList.add("animate__fadeOutLeft"); // Fade out div1
+
+        setTimeout(function() {
+          div1.style.display = "none"; // Hide div1 after fade out
+          div2.style.display = "block"; // Show div2
+          div2.classList.add("animate__fadeInRight"); // Start fade-in for div2
+
+          // After another 3 seconds, fade out div2
+          setTimeout(function() {
+            div2.classList.remove("animate__fadeInRight");
+            div2.classList.add("animate__fadeOutLeft"); // Fade out div2
+
+            setTimeout(function() {
+              div2.style.display = "none"; // Hide div2 after fade out
+            }, 1000); // Time to allow fade-out to finish
+          }, 3000); // Wait for 3 seconds before fading out div2
+        }, 1000); // Wait 1 second before fading in div2
+      }, 3000); // Wait for 3 seconds before fading out div1
     }
 
-    window.onload = animateDiv;
+    // Run the fade in and out sequence when the page loads
+    window.onload = fadeInAndOut;
+  </script>
   </script>
   
 
   <!-- Content to show on mobile -->
   <div class="container">
-    <div id="cont1" class="animate__animated animate__bounceIn">
-      <h1>The greatest IT Consultant</h1>
-	  <h1>once sat on this desk ...</h1>
-
-    </div>
+    <div id="div1" class="animate__animated">
+		<h1>The Greatest IT Consultant</h1>
+		<h1>Once sat on this desk ... </h1>
+	</div>
+	<div id="div2" class="animate__animated">
+		<h1>To claim this desk </h1>
+		<h1>You must be worthy ...</h1>	
+	
+	</div>
   </div>
 
 </body>
