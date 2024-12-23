@@ -37,10 +37,11 @@
     let pipes = [];
     let score = 0;
     let gameRunning = false;
+    let lastTime = 0;
 
     const pipeWidth = 50;
     const pipeGap = 150;
-    const pipeSpeed = 3;
+    const pipeSpeed = 200; // Speed in pixels per second
 
     function createPipe() {
         const topHeight = Math.random() * (canvas.height / 2);
@@ -66,9 +67,10 @@
         });
     }
 
-    function updatePipes() {
+    function updatePipes(deltaTime) {
+        const pipeMovement = (pipeSpeed * deltaTime) / 1000;
         pipes.forEach(pipe => {
-            pipe.x -= pipeSpeed;
+            pipe.x -= pipeMovement;
         });
 
         // Remove pipes that are off-screen
@@ -107,8 +109,11 @@
         });
     }
 
-    function gameLoop() {
+    function gameLoop(timestamp) {
         if (!gameRunning) return;
+
+        const deltaTime = timestamp - lastTime;
+        lastTime = timestamp;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -117,7 +122,7 @@
         bird.y += bird.velocity;
 
         // Update pipes
-        updatePipes();
+        updatePipes(deltaTime);
 
         // Check collisions
         if (checkCollision()) {
@@ -144,7 +149,8 @@
     function flap() {
         if (!gameRunning) {
             gameRunning = true;
-            gameLoop();
+            lastTime = performance.now();
+            gameLoop(lastTime);
         }
         bird.velocity = bird.jump;
     }
