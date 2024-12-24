@@ -32,8 +32,13 @@
         size: 20,
         velocity: 0,
         jump: -8,
+		image: new Image(),
+		width: 50,
+        height: 50,
     };
-
+	
+	bird.image.src = 'bird.png';
+	console.log("bird " + bird.image.src)
     let pipes = [];
     let score = 0;
     let gameRunning = false;
@@ -58,7 +63,7 @@
 
     function drawBird() {
         ctx.fillStyle = "yellow";
-        ctx.beginPath();
+        ctx.beginPath();		
         ctx.arc(bird.x, bird.y, bird.size, 0, Math.PI * 2);
         ctx.fill();
     }
