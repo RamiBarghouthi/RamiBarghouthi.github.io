@@ -1,113 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mobile-Only Page</title>
-  <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-    }
-    .container {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    h1 {
-      font-size: 2em;
-      color: #333;
-    }
-	
-	#div1 {
-	 display: none;
-	}
-	#div2 {
-	 display: none;
-	}
-	#div3{
-	display:none;
-	}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: skyblue;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
 </head>
 <body>
+<canvas id="gameCanvas"></canvas>
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-  <!-- JavaScript to check if it's a mobile device -->
-  <script>
-    function fadeInAndOut() {
-      const div1 = document.getElementById("div1");
-      const div2 = document.getElementById("div2");
-	  const div3 = document.getElementById("div3");
-      // Fade in div1
-      div1.style.display = "block";  // Make div1 visible
-      div1.classList.add("animate__fadeInRight");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-      // After 3 seconds, fade out div1 and fade in div2
-      setTimeout(function() {
-        div1.classList.remove("animate__fadeInRight");
-        div1.classList.add("animate__fadeOutLeft"); // Fade out div1
+    const gravity = 0.6;
+    const bird = {
+        x: canvas.width / 4,
+        y: canvas.height / 2,
+        size: 20,
+        velocity: 0,
+        jump: -8,
+		image: new Image(),
+		width: 50,
+        height: 50,
+    };
+	
+	bird.image.src = 'bird.png';
+	console.log("bird " + bird.image.src)
+    let pipes = [];
+    let score = 0;
+    let gameRunning = false;
+    const inputQueue = [];
 
-        setTimeout(function() {
-          div1.style.display = "none"; // Hide div1 after fade out
-          div2.style.display = "block"; // Show div2
-          div2.classList.add("animate__fadeInRight"); // Start fade-in for div2
+    const pipeWidth = 50;
+    const pipeGap = 150;
+    const pipeSpeed = 3; // Pixels per frame
 
-          // After another 3 seconds, fade out div2
-          setTimeout(function() {
-            div2.classList.remove("animate__fadeInRight");
-            div2.classList.add("animate__fadeOutLeft"); // Fade out div2
+    const fps = 60; // Fixed update rate
+    const frameDuration = 1000 / fps;
+    let lastUpdateTime = 0;
 
-            setTimeout(function() {
-              div2.style.display = "none"; 
-			  div3.style.display = "block"; // Show div2
-			  div3.classList.add("animate__fadeInRight");
-			  
-			  setTimeout(function() {
-              window.location.href = "https://www.example.com";
-			  }, 2000);
-			  // Start fade-in for div2// Hide div2 after fade out
-            }, 1000); // Time to allow fade-out to finish
-          }, 3000); // Wait for 3 seconds before fading out div2
-        }, 1000); // Wait 1 second before fading in div2
-      }, 3000); // Wait for 3 seconds before fading out div1
+    function createPipe() {
+        const topHeight = Math.random() * (canvas.height / 2);
+        pipes.push({
+            x: canvas.width,
+            top: topHeight,
+            bottom: topHeight + pipeGap,
+        });
     }
 
-    // Run the fade in and out sequence when the page loads
-    window.onload = fadeInAndOut;
-  </script>
-  </script>
-  
+    function drawBird() {
+        ctx.fillStyle = "yellow";
+        ctx.beginPath();		
+        ctx.arc(bird.x, bird.y, bird.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
-  <!-- Content to show on mobile -->
-  <div class="container">
-    <div id="div1" class="animate__animated">
-		<h1>The Greatest IT Consultant</h1>
-		<h1>Once sat on this desk ... </h1>
-	</div>
-	<div id="div2" class="animate__animated">
-		<h1>To claim this desk </h1>
-		<h1>You must be worthy ...</h1>	
-	
-	</div>
-	<div id="div3" class="animate__animated">
-		<h1>Highest Score</h1>
-		<h1>Gets The Desk !</h1>	
-	
-	</div>
-  </div>
+    function drawPipes() {
+        ctx.fillStyle = "green";
+        pipes.forEach(pipe => {
+            ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+            ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+        });
+    }
 
+    function updatePipes() {
+        pipes.forEach(pipe => {
+            pipe.x -= pipeSpeed;
+        });
+
+        // Remove pipes that are off-screen
+        pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
+
+        // Add a new pipe when the last one is halfway across the screen
+        if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width / 2) {
+            createPipe();
+        }
+    }
+
+    function checkCollision() {
+        if (bird.y + bird.size > canvas.height || bird.y - bird.size < 0) {
+            return true;
+        }
+
+        for (const pipe of pipes) {
+            if (
+                bird.x + bird.size > pipe.x &&
+                bird.x - bird.size < pipe.x + pipeWidth &&
+                (bird.y - bird.size < pipe.top || bird.y + bird.size > pipe.bottom)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function updateScore() {
+        pipes.forEach(pipe => {
+            if (!pipe.passed && bird.x > pipe.x + pipeWidth) {
+                score++;
+                pipe.passed = true;
+            }
+        });
+    }
+
+    function gameUpdate() {
+        bird.velocity += gravity;
+        bird.y += bird.velocity;
+
+        // Process input queue
+        while (inputQueue.length > 0) {
+            inputQueue.shift();
+            bird.velocity = bird.jump;
+        }
+
+        updatePipes();
+
+        if (checkCollision()) {
+            gameRunning = false;
+            alert(`Game Over! Your score: ${score}`);
+            window.location.reload();
+        }
+
+        updateScore();
+    }
+
+    function gameRender() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawBird();
+        drawPipes();
+
+        ctx.fillStyle = "white";
+        ctx.font = "30px Arial";
+        ctx.fillText(`Score: ${score}`, 10, 40);
+    }
+
+    function gameLoop(timestamp) {
+        if (!gameRunning) return;
+
+        if (!lastUpdateTime) lastUpdateTime = timestamp;
+        const deltaTime = timestamp - lastUpdateTime;
+
+        if (deltaTime >= frameDuration) {
+            lastUpdateTime = timestamp;
+            gameUpdate();
+        }
+
+        gameRender();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function flap() {
+        inputQueue.push(true);
+        if (!gameRunning) {
+            gameRunning = true;
+            requestAnimationFrame(gameLoop);
+        }
+    }
+
+    canvas.addEventListener("touchstart", flap, { passive: false });
+
+    createPipe();
+    drawBird();
+</script>
 </body>
 </html>
