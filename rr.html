@@ -73,7 +73,12 @@
             setTimeout(function() {
               div2.style.display = "none"; 
 			  div3.style.display = "block"; // Show div2
-			  div3.classList.add("animate__fadeInRight"); // Start fade-in for div2// Hide div2 after fade out
+			  div3.classList.add("animate__fadeInRight");
+			  
+			  setTimeout(function() {
+              window.location.href = "https://www.example.com";
+			  }, 2000);
+			  // Start fade-in for div2// Hide div2 after fade out
             }, 1000); // Time to allow fade-out to finish
           }, 3000); // Wait for 3 seconds before fading out div2
         }, 1000); // Wait 1 second before fading in div2
@@ -98,8 +103,8 @@
 	
 	</div>
 	<div id="div3" class="animate__animated">
-		<h1>Nothing worth having</h1>
-		<h1>Comes Easy</h1>	
+		<h1>Highest Score</h1>
+		<h1>Gets The Desk !</h1>	
 	
 	</div>
   </div>
